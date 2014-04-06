@@ -281,7 +281,11 @@ public class PluginImpl extends Plugin implements Action, Serializable, Describa
      * Determines the host name of the Jenkins master.
      */
     public static String getMasterHostName() {
-        return getPlugin().hostnameResolver.retrieveHost();
+    	HostnameResolver tHost = getPlugin().hostnameResolver;
+    	if(tHost != null){
+    		return getPlugin().hostnameResolver.retrieveHost();
+    	}
+        return "localhost";
     }
 
     /**
