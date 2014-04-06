@@ -12,7 +12,8 @@ import hudson.remoting.Callable;
  */
 public class StopSeleniumServer implements Callable<Void, Exception> {
 
-    /**
+	private static final long serialVersionUID = 1L;
+	/**
      * Name of the configuration associated to the channel to stop.
      */
     private String name;
