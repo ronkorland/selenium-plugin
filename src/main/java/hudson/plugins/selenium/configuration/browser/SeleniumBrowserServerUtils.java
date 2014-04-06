@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.apache.commons.lang3.StringUtils;
+import org.openqa.selenium.Platform;
 
 /**
  * @author Richard Lavoie
@@ -103,13 +104,22 @@ public final class SeleniumBrowserServerUtils {
 	}
 
 	private static String getChromeDriverName() {
-		if (OS.indexOf("win") >= 0) {
-			return "chromedriver_win32.exe";
-		} else if (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0
-				|| OS.indexOf("aix") > 0) {
-			return "chromedriver_linux32";
-		} else if (OS.indexOf("mac") >= 0) {
+		Platform current = Platform.getCurrent();
+
+		switch (current) {
+		case ANDROID:
+		case ANY:
+			return null;
+		case MAC:
 			return "chromedriver_mac32";
+		case LINUX:
+		case UNIX:
+			return "chromedriver_linux32";
+		case VISTA:
+		case WIN8:
+		case WINDOWS:
+		case XP:
+			return "chromedriver_win32.exe";
 		}
 		return null;
 	}
