@@ -1,6 +1,9 @@
 package hudson.plugins.selenium.configuration.browser.webdriver;
 
 import hudson.Extension;
+import hudson.model.Computer;
+import hudson.plugins.selenium.configuration.browser.SeleniumBrowserServerUtils;
+import hudson.plugins.selenium.process.SeleniumRunOptions;
 import hudson.util.FormValidation;
 
 import java.util.HashMap;
@@ -12,47 +15,59 @@ import org.kohsuke.stapler.QueryParameter;
 
 public class ChromeBrowser extends ServerRequiredWebDriverBrowser {
 
-    /**
+	/**
 	 * 
 	 */
-    private static final long serialVersionUID = 8505665387429684157L;
+	private static final long serialVersionUID = 8505665387429684157L;
 
-    /**
-     * System property to specify the chrome binary location. Could be done through a tool installer and probably moved into the chromedriver plugin.
-     */
-    transient final protected String PARAM_BINARY_PATH = "webdriver.chrome.driver";
+	/**
+	 * System property to specify the chrome binary location. Could be done
+	 * through a tool installer and probably moved into the chromedriver plugin.
+	 */
+	transient final protected String PARAM_BINARY_PATH = "webdriver.chrome.driver";
 
-    @DataBoundConstructor
-    public ChromeBrowser(int maxInstances, String version, String server_binary) {
-        super(maxInstances, version, "chrome", server_binary);
-    }
+	@DataBoundConstructor
+	public ChromeBrowser(int maxInstances, String version, String server_binary) {
+		super(maxInstances, version, "chrome", server_binary);
+	}
 
-    @Override
-    public Map<String, String> getJVMArgs() {
-        Map<String, String> args = new HashMap<String, String>();
-        combine(args, PARAM_BINARY_PATH, getServerBinary());
-        return args;
-    }
+	@Override
+	public Map<String, String> getJVMArgs() {
+		Map<String, String> args = new HashMap<String, String>();
+		combine(args, PARAM_BINARY_PATH, getServerBinary());
+		return args;
+	}
 
-    @Extension
-    public static class DescriptorImpl extends WebDriverBrowserDescriptor {
+	@Override
+	public void initOptions(Computer c, SeleniumRunOptions opt) {
+		String server_path = SeleniumBrowserServerUtils
+				.uploadChromeDriverIfNecessary(c, getServerBinary());
+		if (server_path != null) {
+			opt.getJVMArguments().put(PARAM_BINARY_PATH, server_path);
+		}
+		opt.addOptionIfSet("-browser",
+				StringUtils.join(initBrowserOptions(c, opt), ","));
+	}
 
-        public String getMaxInstances() {
-            return "5";
-        }
+	@Extension
+	public static class DescriptorImpl extends WebDriverBrowserDescriptor {
 
-        @Override
-        public String getDisplayName() {
-            return "Chrome";
-        }
+		public String getMaxInstances() {
+			return "5";
+		}
 
-        public FormValidation doCheckServer_binary(@QueryParameter String value) {
-            if (StringUtils.isBlank(value)) {
-                return FormValidation
-                        .warning("Must not be empty unless it is already defined from a previous chrome browser definition or already defined in the path");
-            }
-            return FormValidation.ok();
-        }
+		@Override
+		public String getDisplayName() {
+			return "Chrome";
+		}
 
-    }
+		public FormValidation doCheckServer_binary(@QueryParameter String value) {
+			if (StringUtils.isBlank(value)) {
+				return FormValidation
+						.warning("Must not be empty unless it is already defined from a previous chrome browser definition or already defined in the path");
+			}
+			return FormValidation.ok();
+		}
+
+	}
 }
