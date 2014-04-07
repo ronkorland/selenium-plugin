@@ -61,13 +61,5 @@ public class ChromeBrowser extends ServerRequiredWebDriverBrowser {
 			return "Chrome";
 		}
 
-		public FormValidation doCheckServer_binary(@QueryParameter String value) {
-			if (StringUtils.isBlank(value)) {
-				return FormValidation
-						.warning("Must not be empty unless it is already defined from a previous chrome browser definition or already defined in the path");
-			}
-			return FormValidation.ok();
-		}
-
 	}
 }
