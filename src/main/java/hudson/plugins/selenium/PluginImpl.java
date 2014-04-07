@@ -50,7 +50,9 @@ import hudson.util.StreamTaskListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -110,12 +112,6 @@ public class PluginImpl extends Plugin implements Action, Serializable,
 	private String rcLog;
 
 	private HostnameResolver hostnameResolver;
-
-	// Kept only for backward compatibility...
-	private transient String rcFirefoxProfileTemplate;
-	private transient Boolean rcBrowserSessionReuse;
-	private transient Boolean rcTrustAllSSLCerts;
-	private transient Boolean rcBrowserSideLog;
 
 	private List<SeleniumGlobalConfiguration> configurations = new ArrayList<SeleniumGlobalConfiguration>();
 
@@ -285,13 +281,16 @@ public class PluginImpl extends Plugin implements Action, Serializable,
 
 	/**
 	 * Determines the host name of the Jenkins master.
+	 * 
+	 * @throws UnknownHostException
 	 */
-	public static String getMasterHostName() {
+	public static String getMasterHostName() throws UnknownHostException {
 		HostnameResolver tHost = getPlugin().hostnameResolver;
 		if (tHost != null) {
 			return getPlugin().hostnameResolver.retrieveHost();
+		} else {
+			return InetAddress.getLocalHost().getHostAddress();
 		}
-		return "localhost";
 	}
 
 	/**
