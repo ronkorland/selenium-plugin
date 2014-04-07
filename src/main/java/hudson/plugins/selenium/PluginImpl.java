@@ -47,8 +47,10 @@ import hudson.security.Permission;
 import hudson.util.IOException2;
 import hudson.util.StreamTaskListener;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.URL;
@@ -238,15 +240,14 @@ public class PluginImpl extends Plugin implements Action, Serializable,
 	@Exported(inline = true)
 	public Collection<SeleniumTestSlotGroup> getRemoteControls()
 			throws IOException, InterruptedException {
-		if (channel == null)
+		
+		if (channel == null){
 			return Collections.emptyList();
+		}
 
 		Collection<SeleniumTestSlotGroup> rcs = channel
 				.call(new Callable<Collection<SeleniumTestSlotGroup>, RuntimeException>() {
 
-					/**
-			 * 
-			 */
 					private static final long serialVersionUID = 1791985298575049757L;
 
 					public Collection<SeleniumTestSlotGroup> call()
@@ -261,7 +262,11 @@ public class PluginImpl extends Plugin implements Action, Serializable,
 									SeleniumTestSlotGroup grp = groups
 											.get(host);
 									if (grp == null) {
-										grp = new SeleniumTestSlotGroup(host);
+										String platform = (String) slot
+												.getCapabilities().get(
+														"platform");
+										grp = new SeleniumTestSlotGroup(host,
+												platform);
 										groups.put(host, grp);
 									}
 									grp.addTestSlot(new SeleniumTestSlot(slot));

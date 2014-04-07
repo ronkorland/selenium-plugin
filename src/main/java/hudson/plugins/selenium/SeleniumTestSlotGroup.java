@@ -18,79 +18,87 @@ import org.kohsuke.stapler.export.ExportedBean;
  * 
  */
 @ExportedBean
-public class SeleniumTestSlotGroup implements Comparable<SeleniumTestSlotGroup>, Serializable {
+public class SeleniumTestSlotGroup implements
+		Comparable<SeleniumTestSlotGroup>, Serializable {
 
-    /**
+	/**
      * 
      */
-    private static final long serialVersionUID = 8967484262051147802L;
+	private static final long serialVersionUID = 8967484262051147802L;
 
-    private URL host;
+	private URL host;
 
-    private List<SeleniumTestSlot> slots = new ArrayList<SeleniumTestSlot>();
+	private List<SeleniumTestSlot> slots = new ArrayList<SeleniumTestSlot>();
 
-    public SeleniumTestSlotGroup(URL host) {
-        this.host = host;
-    }
+	private String platform;
 
-    public List<SeleniumTestSlot> getSlots() {
-        return slots;
-    }
+	public SeleniumTestSlotGroup(URL host, String platform) {
+		this.host = host;
+		this.platform = platform;
+	}
 
-    public void addTestSlot(SeleniumTestSlot slot) {
-        this.slots.add(slot);
-    }
+	public String getPlatform() {
+		return platform;
+	}
 
-    public String getHostAndPort() {
-        return host.toExternalForm();
-    }
+	public List<SeleniumTestSlot> getSlots() {
+		return slots;
+	}
 
-    @Exported
-    public String getHost() {
-        return host.getHost();
-    }
+	public void addTestSlot(SeleniumTestSlot slot) {
+		this.slots.add(slot);
+	}
 
-    @Exported
-    public int getPort() {
-        return host.getPort();
-    }
+	public String getHostAndPort() {
+		return host.toExternalForm();
+	}
 
-    private static class BusyCounter {
+	@Exported
+	public String getHost() {
+		return host.getHost();
+	}
 
-        int free = 0;
-        int count = 0;
-    }
+	@Exported
+	public int getPort() {
+		return host.getPort();
+	}
 
-    public String getSummary() {
-        Map<String, BusyCounter> counters = new TreeMap<String, BusyCounter>();
+	private static class BusyCounter {
 
-        for (SeleniumTestSlot slot : slots) {
-            String browser = slot.getBrowserName();
-            BusyCounter c = counters.get(browser);
-            if (c == null) {
-                c = new BusyCounter();
-                counters.put(browser, c);
-            }
-            c.count++;
-            if (!slot.isReserved()) {
-                c.free++;
-            }
-        }
+		int free = 0;
+		int count = 0;
+	}
 
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, BusyCounter> entry : counters.entrySet()) {
-            BusyCounter counter = entry.getValue();
-            sb.append(entry.getKey()).append(" ").append(counter.free).append("/").append(counter.count).append(", ");
-        }
+	public String getSummary() {
+		Map<String, BusyCounter> counters = new TreeMap<String, BusyCounter>();
 
-        return sb.substring(0, sb.length() - 2);
-    }
+		for (SeleniumTestSlot slot : slots) {
+			String browser = slot.getBrowserName();
+			BusyCounter c = counters.get(browser);
+			if (c == null) {
+				c = new BusyCounter();
+				counters.put(browser, c);
+			}
+			c.count++;
+			if (!slot.isReserved()) {
+				c.free++;
+			}
+		}
 
-    public int compareTo(SeleniumTestSlotGroup that) {
-        int r = this.getHost().compareTo(that.getHost());
-        if (r != 0)
-            return r;
-        return this.getPort() - that.getPort();
-    }
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<String, BusyCounter> entry : counters.entrySet()) {
+			BusyCounter counter = entry.getValue();
+			sb.append(entry.getKey()).append(" ").append(counter.free)
+					.append("/").append(counter.count).append(", ");
+		}
 
+		return sb.substring(0, sb.length() - 2);
+	}
+
+	public int compareTo(SeleniumTestSlotGroup that) {
+		int r = this.getHost().compareTo(that.getHost());
+		if (r != 0)
+			return r;
+		return this.getPort() - that.getPort();
+	}
 }

@@ -48,7 +48,9 @@
          <j:when test="${!empty(rcs)}">
             <div id="proxies">
              <j:forEach var="rc" items="${rcs}">
-                    <h3>${rc.hostAndPort} (${rc.getSummary()})</h3>
+                    <h3>Host: ${rc.host} OS: ${rc.platform} 
+                    <br/>
+                    Slots: (${rc.getSummary()})</h3>
                     <div><span class="browser-category">
                     <j:forEach var="test" items="${rc.slots}">
                          <img class="session-${test.isReserved() ? 'busy' : 'free'}" src="${rootURL}/plugin/selenium/16x16/${test.unifiedBrowserName}.png" height="16" width="16" title="${test.capabilities}" />
