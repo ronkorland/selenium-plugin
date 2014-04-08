@@ -47,10 +47,8 @@ import hudson.security.Permission;
 import hudson.util.IOException2;
 import hudson.util.StreamTaskListener;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.URL;
@@ -234,14 +232,13 @@ public class PluginImpl extends Plugin implements Action, Serializable,
 
 		this.listener.closeQuietly();
 		channel.close();
-
 	}
 
 	@Exported(inline = true)
 	public Collection<SeleniumTestSlotGroup> getRemoteControls()
 			throws IOException, InterruptedException {
-		
-		if (channel == null){
+
+		if (channel == null) {
 			return Collections.emptyList();
 		}
 
@@ -384,7 +381,7 @@ public class PluginImpl extends Plugin implements Action, Serializable,
 		}
 
 		listener.getLogger().println(
-				"Starting Selenium nodes on " + c.getName());
+				"Starting Selenium nodes on " + c.getDisplayName());
 
 		for (SeleniumGlobalConfiguration config : confs) {
 			if ((conf != null && config.getName().equals(conf)) || conf == null) {
@@ -396,6 +393,17 @@ public class PluginImpl extends Plugin implements Action, Serializable,
 				}
 			}
 		}
+	}
+
+	public static void stopSeleniumNode(Computer c) {
+		List<SeleniumGlobalConfiguration> configurations = getPlugin()
+				.getGlobalConfigurationForComputer(c);
+		if (configurations != null && c != null) {
+			for (SeleniumGlobalConfiguration cfg : configurations) {
+				cfg.stop(c);
+			}
+		}
+
 	}
 
 	public static PluginImpl getPlugin() {

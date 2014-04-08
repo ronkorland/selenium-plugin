@@ -63,20 +63,17 @@ public class SeleniumCallable implements FileCallable<String> {
 	 */
 	private static final long serialVersionUID = 2047557797415325512L;
 
-	// public final static String ALREADY_STARTED =
-	// SeleniumCallable.class.getName() + ".seleniumRcAlreadyStarted";
-
 	public String invoke(File f, VirtualChannel channel) throws IOException {
 		RemoteRunningStatus status = (RemoteRunningStatus) PropertyUtils
 				.getMapProperty(SeleniumConstants.PROPERTY_STATUS.displayName,
 						config);
 
 		if (status != null && status.isRunning()) {
-			// listener.getLogger().println("Skipping Selenium RC execution because this slave has already started its RCs");
+			listener.getLogger().println("Skipping Selenium RC execution because this slave has already started its RCs");
 			return null;
 		}
 
-		// listener.getLogger().println("Copy grid jar");
+		listener.getLogger().println("Copy grid jar");
 		File localJar = new File(f, seleniumJar.getName());
 		if (localJar.lastModified() != jarTimestamp) {
 			try {
@@ -89,7 +86,7 @@ public class SeleniumCallable implements FileCallable<String> {
 
 		try {
 
-			// listener.getLogger().println("Creating selenium VM");
+			listener.getLogger().println("Creating selenium VM");
 			Channel jvm = SeleniumProcessUtils.createSeleniumRCVM(localJar,
 					listener, options.getJVMArguments(),
 					options.getEnvironmentVariables());
@@ -102,7 +99,7 @@ public class SeleniumCallable implements FileCallable<String> {
 				arguments.addAll(arg.toArgumentsList());
 			}
 
-			// listener.getLogger().println("Starting the selenium process");
+			listener.getLogger().println("Starting the selenium process");
 			jvm.callAsync(new RemoteControlLauncher(nodeName,
 					(String[]) ArrayUtils.addAll(defaultArgs,
 							arguments.toArray(new String[0]))));
@@ -112,16 +109,14 @@ public class SeleniumCallable implements FileCallable<String> {
 			status.setRunning(false);
 			status.setStatus(SeleniumConstants.ERROR);
 			LOGGER.log(Level.WARNING, "Selenium launch failed", t);
-			// listener.getLogger().println( "Selenium launch failed" +
-			// t.getMessage());
+			listener.getLogger().println( "Selenium launch failed" +
+			t.getMessage());
 
 			throw new IOException2("Selenium launch interrupted", t);
 		}
 		PropertyUtils.setMapProperty(
 				SeleniumConstants.PROPERTY_STATUS.displayName, config, status);
 
-		// System.setProperty(alreadyStartedPropertyName,
-		// Boolean.TRUE.toString());
 		return null;
 	}
 }

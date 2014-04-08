@@ -29,6 +29,7 @@ public class ComputerListenerImpl extends ComputerListener implements Serializab
     @Override
     public void onOffline(Computer c) {
         try {
+        	PluginImpl.stopSeleniumNode(c);
             new ServiceManagementAction(c).doStop(null);
         } catch (Throwable e) {
         }
