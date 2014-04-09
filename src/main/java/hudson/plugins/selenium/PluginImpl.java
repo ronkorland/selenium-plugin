@@ -30,6 +30,7 @@ import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.Label;
+import hudson.plugins.selenium.callables.SeleniumTestSlotGroupCallable;
 import hudson.plugins.selenium.configuration.ConfigurationDescriptor;
 import hudson.plugins.selenium.configuration.CustomWDConfiguration;
 import hudson.plugins.selenium.configuration.SeleniumNodeConfiguration;
@@ -41,7 +42,6 @@ import hudson.plugins.selenium.configuration.global.matcher.MatchAllMatcher;
 import hudson.plugins.selenium.configuration.global.matcher.SeleniumConfigurationMatcher;
 import hudson.plugins.selenium.configuration.global.matcher.SeleniumConfigurationMatcher.MatcherDescriptor;
 import hudson.plugins.selenium.process.SeleniumProcessUtils;
-import hudson.remoting.Callable;
 import hudson.remoting.Channel;
 import hudson.security.Permission;
 import hudson.util.IOException2;
@@ -51,14 +51,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -75,9 +73,6 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 import org.kohsuke.stapler.framework.io.LargeText;
-import org.openqa.grid.internal.Registry;
-import org.openqa.grid.internal.RemoteProxy;
-import org.openqa.grid.internal.TestSlot;
 import org.springframework.util.StringUtils;
 
 /**
@@ -243,40 +238,7 @@ public class PluginImpl extends Plugin implements Action, Serializable,
 		}
 
 		Collection<SeleniumTestSlotGroup> rcs = channel
-				.call(new Callable<Collection<SeleniumTestSlotGroup>, RuntimeException>() {
-
-					private static final long serialVersionUID = 1791985298575049757L;
-
-					public Collection<SeleniumTestSlotGroup> call()
-							throws RuntimeException {
-						Map<URL, SeleniumTestSlotGroup> groups = new HashMap<URL, SeleniumTestSlotGroup>();
-
-						Registry registry = RegistryHolder.registry;
-						if (registry != null) {
-							for (RemoteProxy proxy : registry.getAllProxies()) {
-								for (TestSlot slot : proxy.getTestSlots()) {
-									URL host = slot.getProxy().getRemoteHost();
-									SeleniumTestSlotGroup grp = groups
-											.get(host);
-									if (grp == null) {
-										String platform = (String) slot
-												.getCapabilities().get(
-														"platform");
-										grp = new SeleniumTestSlotGroup(host,
-												platform);
-										groups.put(host, grp);
-									}
-									grp.addTestSlot(new SeleniumTestSlot(slot));
-								}
-
-							}
-						}
-						List<SeleniumTestSlotGroup> values = new ArrayList<SeleniumTestSlotGroup>(
-								groups.values());
-						Collections.sort(values);
-						return values;
-					}
-				});
+				.call(new SeleniumTestSlotGroupCallable());
 		return rcs;
 
 	}
@@ -388,7 +350,7 @@ public class PluginImpl extends Plugin implements Action, Serializable,
 				try {
 					config.start(c, listener);
 				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
+					listener.getLogger().println(e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -403,7 +365,6 @@ public class PluginImpl extends Plugin implements Action, Serializable,
 				cfg.stop(c);
 			}
 		}
-
 	}
 
 	public static PluginImpl getPlugin() {
@@ -537,7 +498,7 @@ public class PluginImpl extends Plugin implements Action, Serializable,
 				5, null, null));
 		browsers.add(new hudson.plugins.selenium.configuration.browser.webdriver.ChromeBrowser(
 				5, null, null));
-		return new CustomWDConfiguration(4445, null, browsers, null);
+		return new CustomWDConfiguration(5555, null, browsers, null);
 	}
 
 	/**
